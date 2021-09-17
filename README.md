@@ -21,7 +21,7 @@ $string = Postal::state('Texas'); // TX
 $string = Postal::zip('77777-7777'); // 77777
 ```
 
-Sometimes, when crunching through thousands of addresses, you may want to use hashes to determine the uniqueness of the address.  Stripping commons words from the address, such as ``street`` and ``road``, can be helpful in this context, as users may enter the address differently by including or omitting these words.
+Sometimes, when crunching through thousands of addresses, you may want to use hashes to determine the uniqueness of the address.  Stripping common words from the address, such as ``Street`` and ``Road``, can be helpful in this context, as users may enter the address differently by including or omitting these words.
 
 ```php
 $string = Postal::street('300 Independence Ave SE #300', true); // pass true flag, returns "300 INDEPENDENCE SOUTHEAST 300"
