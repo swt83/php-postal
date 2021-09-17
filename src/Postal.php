@@ -780,13 +780,106 @@ class Postal
         'RUN' => '',
         'WAY' => '',
         'LOOP' => '',
+        'AVENUE' => '',
     ];
 
-    public static function run($string, $mode = 'street', $is_remove_commons = false)
-    {
-        // save original
-        $original = $string;
+    protected static $states = [
+        'AL' => 'ALABAMA',
+        'AK' => 'ALASKA',
+        'AZ' => 'ARIZONA',
+        'AR' => 'ARKANSAS',
+        'CA' => 'CALIFORNIA',
+        'CO' => 'COLORADO',
+        'CT' => 'CONNECTICUT',
+        'DC' => 'DISTRICT OF COLUMBIA',
+        'DE' => 'DELAWARE',
+        'FL' => 'FLORIDA',
+        'GA' => 'GEORGIA',
+        'HI' => 'HAWAII',
+        'ID' => 'IDAHO',
+        'IL' => 'ILLINOIS',
+        'IN' => 'INDIANA',
+        'IA' => 'IOWA',
+        'KS' => 'KANSAS',
+        'KY' => 'KENTUCKY',
+        'LA' => 'LOUISIANA',
+        'ME' => 'MAINE',
+        'MD' => 'MARYLAND',
+        'MA' => 'MASSACHUSETTS',
+        'MI' => 'MICHIGAN',
+        'MN' => 'MINNESOTA',
+        'MS' => 'MISSISSIPPI',
+        'MO' => 'MISSOURI',
+        'MT' => 'MONTANA',
+        'NE' => 'NEBRASKA',
+        'NV' => 'NEVADA',
+        'NH' => 'NEW HAMPSHIRE',
+        'NJ' => 'NEW JERSEY',
+        'NM' => 'NEW MEXICO',
+        'NY' => 'NEW YORK',
+        'NC' => 'NORTH CAROLINA',
+        'ND' => 'NORTH DAKOTA',
+        'OH' => 'OHIO',
+        'OK' => 'OKLAHOMA',
+        'OR' => 'OREGON',
+        'PA' => 'PENNSYLVANIA',
+        'RI' => 'RHODE ISLAND',
+        'SC' => 'SOUTH CAROLINA',
+        'SD' => 'SOUTH DAKOTA',
+        'TN' => 'TENNESSEE',
+        'TX' => 'TEXAS',
+        'UT' => 'UTAH',
+        'VT' => 'VERMONT',
+        'VA' => 'VIRGINIA',
+        'WA' => 'WASHINGTON',
+        'WV' => 'WEST VIRGINIA',
+        'WI' => 'WISCONSIN',
+        'WY' => 'WYOMING',
+        'AS' => 'AMERICAN SAMOA',
+        'FM' => 'FEDERATED STATES OF MICRONESIA',
+        'GU' => 'GUAM',
+        'MH' => 'MARSHALL ISLANDS',
+        'MP' => 'NORTHERN MARIANA ISLANDS',
+        'PW' => 'PALAU',
+        'PR' => 'PUERTO RICO',
+        'VI' => 'VIRGIN ISLANDS',
+        'AA' => 'ARMED FORCES AMERICAS',
+        'AE' => 'ARMED FORCES EUROPE, CANADA, AFRICA AND THE MIDDLE EAST',
+        'AP' => 'ARMED FORCES ASIA AND PACIFIC',
+    ];
 
+    public static function street($string, $is_remove_common_words = false)
+    {
+        return static::run($string, 'street', $is_remove_common_words);
+    }
+
+    public static function city($string)
+    {
+        return static::run($string, 'city');
+    }
+
+    public static function state($string)
+    {
+        // uppercase
+        $string = strtoupper($string);
+
+        // load states
+        $states = array_flip(static::$states);
+
+        // return
+        return ex($states, $string, $string);
+    }
+
+    public static function zip($string)
+    {
+        $parts = explode('-', $string);
+
+        // return
+        return (string) str_pad(ex($parts, 0), 5, '0', STR_PAD_LEFT);
+    }
+
+    protected static function run($string, $mode, $is_remove_common_words = false)
+    {
         // filter symbols
         $string = str_ireplace(array_keys(static::$symbols), array_values(static::$symbols), $string);
 
@@ -814,7 +907,7 @@ class Postal
             $word = isset(static::$streets[$word]) ? static::$streets[$word] : $word;
 
             // patch word for commons
-            if ($is_remove_commons)
+            if ($is_remove_common_words)
             {
                 $word = isset(static::$commons[$word]) ? static::$commons[$word] : $word;
             }
@@ -827,7 +920,7 @@ class Postal
         $string = trim(implode(' ', $final));
 
         // patch word "road"
-        if ($is_remove_commons)
+        if ($is_remove_common_words)
         {
             if (strpos($string, 'RANCH ROAD') !== false)
             {
