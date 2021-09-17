@@ -8,6 +8,8 @@ class Postal
         ',' => '',
         '.' => '',
         '#' => '',
+        'PMB' => '',
+        'P O ' => 'PO ', // space is important
         'POST OFFICE' => 'PO',
         'FARM TO MARKET' => 'FM',
     ];
@@ -153,6 +155,7 @@ class Postal
         'CIRCLE' => 'CIRCLE',
         'CRCL' => 'CIRCLE',
         'CRCLE' => 'CIRCLE',
+        'CR' => 'CIRCLE',
         'CIRS' => 'CIRCLES',
         'CIRCLES' => 'CIRCLES',
         'CLF' => 'CLIFF',
@@ -433,6 +436,7 @@ class Postal
         'LDGE' => 'LODGE',
         'LODG' => 'LODGE',
         'LODGE' => 'LODGE',
+        'LP' => 'LOOP',
         'LOOP' => 'LOOP',
         'LOOP' => 'LOOP',
         'LOOPS' => 'LOOP',
@@ -499,9 +503,9 @@ class Postal
         'PKWAY' => 'PARKWAY',
         'PKWY' => 'PARKWAY',
         'PKY' => 'PARKWAY',
-        'PKWY' => 'PARKWAYS',
-        'PARKWAYS' => 'PARKWAYS',
-        'PKWYS' => 'PARKWAYS',
+        'PKWY' => 'PARKWAY',
+        'PARKWAYS' => 'PARKWAY',
+        'PKWYS' => 'PARKWAY',
         'PASS' => 'PASS',
         'PASS' => 'PASS',
         'PSGE' => 'PASSAGE',
@@ -678,6 +682,7 @@ class Postal
         'TRKS' => 'TRACK',
         'TRFY' => 'TRAFFICWAY',
         'TRAFFICWAY' => 'TRAFFICWAY',
+        'TR' => 'TRAIL',
         'TRL' => 'TRAIL',
         'TRAIL' => 'TRAIL',
         'TRAILS' => 'TRAIL',
@@ -763,16 +768,25 @@ class Postal
 
     protected static $commons = [
         'STREET' => '',
-        'ST' => '',
-        'ROAD' => '',
-        'RD' => '',
+        #'ROAD' => '', // can't erase "ranch road"
         'UNIT' => '',
         'SUITE' => '',
-        'STE' => '',
+        'DRIVE' => '',
+        'LANE' => '',
+        'CIRCLE' => '',
+        'COURT' => '',
+        'BOULEVARD' => '',
+        'TRAIL' => '',
+        'RUN' => '',
+        'WAY' => '',
+        'LOOP' => '',
     ];
 
-    public static function run($string, $mode = 'street')
+    public static function run($string, $mode = 'street', $is_remove_commons = false)
     {
+        // save original
+        $original = $string;
+
         // filter symbols
         $string = str_ireplace(array_keys(static::$symbols), array_values(static::$symbols), $string);
 
@@ -800,13 +814,32 @@ class Postal
             $word = isset(static::$streets[$word]) ? static::$streets[$word] : $word;
 
             // patch word for commons
-            $word = isset(static::$commons[$word]) ? static::$commons[$word] : $word;
+            if ($is_remove_commons)
+            {
+                $word = isset(static::$commons[$word]) ? static::$commons[$word] : $word;
+            }
 
             // save words
             if ($word) $final[] = $word;
         }
 
+        // merge words
+        $string = trim(implode(' ', $final));
+
+        // patch word "road"
+        if ($is_remove_commons)
+        {
+            if (strpos($string, 'RANCH ROAD') !== false)
+            {
+                // do nothing
+            }
+            else
+            {
+                $string = str_ireplace('ROAD', '', $string);
+            }
+        }
+
         // return
-        return trim(implode(' ', $final));
+        return $string;
     }
 }
